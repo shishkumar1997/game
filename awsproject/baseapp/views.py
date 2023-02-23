@@ -2,63 +2,63 @@ from django.shortcuts import render
 import requests
 from requests import request
 from rest_framework import generics,status
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import *
 from .models import Studentdetail
 from rest_framework.response import Response
-from .serializers import AddStudentSerializer,StudentSerializer,UpdateStudentSerializer,Update1StudentSerializer,ShowAddStudentSerializer
+from .serializers import AddStudentSerializer,StudentSerializer,UpdateStudentSerializer,Update1StudentSerializer,ShowAddStudentSerializer,LoginStudentSerializer,Login1StudentSerializer,ShowLoginStudentSerializer
 import xlwt
 from xlwt import Workbook
-# Create your views here.
+from django.contrib.auth.hashers import make_password,check_password
+# from .tests import generate_access_token,generate_refresh_token
+from rest_framework import permissions
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.permissions import IsAuthenticated
+from .tests import generate_access_token,generate_refresh_token
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+from django.core.mail import EmailMessage
+from django.core.mail import send_mail
+import xlsxwriter
+import pandas as pd
+# class kamal(generics.GenericAPIView):
+#     permission_classes = [permissions.IsAuthenticated]
+#     def get(self, request, *args, **kwargs):
+#         return Response({'msg':'Hello'})
 
 class StudentdetailAPI(generics.GenericAPIView):
+    # permission_classes = [IsAuthenticated]
+
     serializer_class = StudentSerializer
-    def get_queryset(self):
-        if request.method == 'GET':
-            return StudentSerializer
-        elif request.method == 'POST':
-            return AddStudentSerializer
-        return super().get_queryset()
-    
-
-    def get(self,request,id=None,*args, **kwargs):
-        try:
-
-            if id:
-                Student_data = Studentdetail.objects.filter(id=id,is_deleted=False).first()
-                if not Student_data:
-                    context = {'status':False , 'message':"please enter valid id"}
-                    return Response(context,status=status.HTTP_200_OK)
-                serializer = self.serializer_class(Student_data)
-                context = {'status':True , 'message':"All student Information", 'data':serializer.data}
-                return Response(context,status=status.HTTP_200_OK)
+    swagger_user_id = openapi.Parameter('user_id',in_=openapi.IN_QUERY, type=openapi.TYPE_STRING)
+    @swagger_auto_schema(manual_parameters=[swagger_user_id])
+    def get(self,request):
+        # try:
+            user_id = self.request.query_params.get('user_id', None)
+            if user_id:
+                Student_data = Studentdetail.objects.filter(id=user_id,is_deleted=False).last()
+                serializer = self.serializer_class(Student_data,many=False)
+                # convert into dataframe
+                df = pd.DataFrame(data=serializer.data, index=[1])
+                #convert into excel
+                df.to_excel("students121.xlsx", index=False)
 
             Student_data = Studentdetail.objects.filter(is_deleted=False).all()
             serializer = self.serializer_class(Student_data,many=True)
-            #################
-
+            # convert into dataframe
+            df = pd.DataFrame(data=serializer.data)
+            #convert into excel
+            df.to_excel("students123.xlsx", index=False)
             
-            # Workbook is created
-            wb = Workbook()
-            
-            # add_sheet is used to create sheet.
-            sheet1 = wb.add_sheet('Sheet 1')
-            
-            sheet1.write(0, 0, 'id')
-            sheet1.write(0, 1, 'name')
-            sheet1.write(0, 2, 'is_deleted')
-            sheet1.write(0, 3, 'image')
-            for i in serializer.data:
-                wb.save('xlwt example.xls')
-            ##############
             context = {'status':True , 'message':"All student Information", 'data':serializer.data}
             return Response(context,status=status.HTTP_200_OK)
-        except Exception as e:
-            context = {'status':False , 'message':"Something went wrong"}
-            return Response(context,status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        # except Exception as e:
+        #     context = {'status':False , 'message':"Something went wrong"}
+        #     return Response(context,status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def post(self,request,*args, **kwargs):
         try:
-            serializer = self.serializer_class(data=request.data)
+            serializer = AddStudentSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
                 context = {'status':True , 'message':"Craete student information successfully", 'data':serializer.data}
@@ -69,22 +69,41 @@ class StudentdetailAPI(generics.GenericAPIView):
             context = {'status':False , 'message':"Something went wrong"}
             return Response(context,status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
 class AddStudentdetailAPI(generics.GenericAPIView):
     serializer_class = AddStudentSerializer
 
+    def send_email():
+        email = EmailMessage(
+            'Title',
+            (AddStudentSerializer.username),
+            'my-email',
+            ['my-receive-email']
+            )
+        email.attach_file(AddStudentSerializer.file)
+        email.send()
     def post(self,request,*args, **kwargs):
-        # try:
+        try:
             serializer = self.serializer_class(data=request.data)
             if serializer.is_valid():
                 mkdir=serializer.save()
                 serializer_data=ShowAddStudentSerializer(mkdir)
+                Studentdetail.objects.filter(username__iexact=serializer_data.data.get('username')).update(password=make_password(request.data.get('password')),email=(request.data.get('username')))
+                send_mail(
+                    'Subject here',
+                    'Here is the message.',
+                    'ashishk140@triazinesoft.com',
+                    ['ashishk140@triazinesoft.com'],
+                    fail_silently=False,
+                            )
+                # send_mail()
                 context = {'status':True , 'message':"Craete student information successfully", 'data':serializer_data.data}
                 return Response(context,status=status.HTTP_200_OK)
             context = {'status':False , 'message':"All student Information", 'data':serializer.errors}
             return Response(context,status=status.HTTP_200_OK)
-        # except:
-        #     context = {'status':False , 'message':"Something went wrong"}
-        #     return Response(context,status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except:
+            context = {'status':False , 'message':"Something went wrong"}
+            return Response(context,status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
 class UpdateStudentdetailAPI(generics.GenericAPIView):
     serializer_class = UpdateStudentSerializer
@@ -120,7 +139,7 @@ class Update1StudentdetailAPI(generics.GenericAPIView):
             print(request.data)
             print(request.data.get('id'),'====data')
 
-            serializer = self.serializer_class(request.data.get('id'), data=request.data, partial=True )
+            serializer = self.serializer_class(request.data.get('id'), data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
                 context = {'status':True , 'message':"Update student information successfully", 'data':serializer.data}
@@ -202,18 +221,49 @@ class DeleteStudentdetailAPI(generics.GenericAPIView):
 
 # feedback/views.py
 
-from .forms import FeedbackForm
-from django.views.generic.edit import FormView
-from django.views.generic.base import TemplateView
+# from .forms import FeedbackForm
+# from django.views.generic.edit import FormView
+# from django.views.generic.base import TemplateView
 
-class FeedbackFormView(FormView):
-    template_name = "feedback/feedback.html"
-    form_class = FeedbackForm
-    success_url = "/success/"
+# class FeedbackFormView(FormView):
+#     template_name = "feedback/feedback.html"
+#     form_class = FeedbackForm
+#     success_url = "/success/"
 
-    def form_valid(self, form):
-        form.send_email()
-        return super().form_valid(form)
+#     def form_valid(self, form):
+#         form.send_email()
+#         return super().form_valid(form)
 
-class SuccessView(TemplateView):
-    template_name = "feedback/success.html"
+# class SuccessView(TemplateView):
+#     template_name = "feedback/success.html"
+
+
+#Student login api
+class StudentLoginAPIView(generics.GenericAPIView):
+    serializer_class = LoginStudentSerializer
+
+    def post(self,request,*args, **kwargs):
+
+        try:
+            stuobj = Studentdetail.objects.filter(username__iexact=request.data.get('username')).first()
+            if not stuobj:
+                context = {'status':True , 'message':"Please enter valid username."}
+                return Response(context,status=status.HTTP_200_OK)
+            serializer = ShowLoginStudentSerializer(stuobj,many=False)
+            if serializer:
+                password_validation=check_password(request.data.get('password'),stuobj.password)
+
+                if not password_validation:
+                    context = {'status':True , 'message':"Password is not match."}
+                    return Response(context,status=status.HTTP_200_OK) 
+                access_token = generate_access_token(stuobj.id)
+                context = {'status':True , 'message':"Login student information successfully.",'access_token':access_token, 'data':serializer.data}
+                return Response(context,status=status.HTTP_200_OK)
+            context = {'status':False , 'message':serializer.errors}
+            return Response(context,status=status.HTTP_200_OK)
+        
+        except:
+
+            context = {'status':False , 'message':"Something went wrong"}
+            return Response(context,status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+

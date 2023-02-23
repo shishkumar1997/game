@@ -1,0 +1,11 @@
+version: "3.8"
+services:
+    django_app:
+        build: .
+        container_name: awsproject
+        # command: cd /myfirst/
+        command: python manage.py runserver 0.0.0.0:8000
+        volumes:
+            - .:/home/admin2/Documents/game/game/awsproject/
+        ports:
+            - "8000:8000"
