@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+from decouple import config 
 import datetime
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -174,13 +175,22 @@ SWAGGER_SETTINGS = {
 }
 
 # SMTP Mail service with decouple
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = "smtp.gmail.com"
-EMAIL_HOST_USER = "ashishk140@triazinesoft.com"
-EMAIL_HOST_PASSWORD = "7633894355"
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+EMAIL_BACKEND = config('EMAIL_BACKEND')
+EMAIL_HOST = config('EMAIL_BACKEND')
+EMAIL_HOST_USER = config('EMAIL_BACKEND')
+EMAIL_HOST_PASSWORD = config('EMAIL_BACKEND')
+EMAIL_PORT = config('EMAIL_PORT', cast=int)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+# # SMTP Mail service with decouple
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = "smtp.gmail.com"
+# EMAIL_HOST_USER = "ashishk140@triazinesoft.com"
+# EMAIL_HOST_PASSWORD = "7633894355"
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 INTERNAL_IPS = [
     # ...

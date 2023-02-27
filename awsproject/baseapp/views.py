@@ -69,41 +69,30 @@ class StudentdetailAPI(generics.GenericAPIView):
             context = {'status':False , 'message':"Something went wrong"}
             return Response(context,status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
+from django.conf import settings
+from django.core.mail import send_mail
 class AddStudentdetailAPI(generics.GenericAPIView):
     serializer_class = AddStudentSerializer
-
-    def send_email():
-        email = EmailMessage(
-            'Title',
-            (AddStudentSerializer.username),
-            'my-email',
-            ['my-receive-email']
-            )
-        email.attach_file(AddStudentSerializer.file)
-        email.send()
     def post(self,request,*args, **kwargs):
-        try:
+        # try:
             serializer = self.serializer_class(data=request.data)
             if serializer.is_valid():
                 mkdir=serializer.save()
                 serializer_data=ShowAddStudentSerializer(mkdir)
                 Studentdetail.objects.filter(username__iexact=serializer_data.data.get('username')).update(password=make_password(request.data.get('password')),email=(request.data.get('username')))
-                send_mail(
-                    'Subject here',
-                    'Here is the message.',
-                    'ashishk140@triazinesoft.com',
-                    ['ashishk140@triazinesoft.com'],
-                    fail_silently=False,
-                            )
-                # send_mail()
+
+                subject = 'welcome to GFG world'
+                message = f'Hi, thank you for registering in geeksforgeeks.'
+                email_from = 'ashishk140@triazinesoft.com'
+                recipient_list = ['ashishk140@triazinesoft.com', ]
+                send_mail( subject, message, email_from, recipient_list )
                 context = {'status':True , 'message':"Craete student information successfully", 'data':serializer_data.data}
                 return Response(context,status=status.HTTP_200_OK)
             context = {'status':False , 'message':"All student Information", 'data':serializer.errors}
             return Response(context,status=status.HTTP_200_OK)
-        except:
-            context = {'status':False , 'message':"Something went wrong"}
-            return Response(context,status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        # except:
+        #     context = {'status':False , 'message':"Something went wrong"}
+        #     return Response(context,status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
 class UpdateStudentdetailAPI(generics.GenericAPIView):
     serializer_class = UpdateStudentSerializer
