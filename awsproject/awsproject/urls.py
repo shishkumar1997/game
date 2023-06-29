@@ -5,7 +5,7 @@ from drf_yasg import openapi
 from django.conf import settings
 from rest_framework import permissions
 from django.conf.urls.static import static
-from django.conf.urls import url
+# from django.conf.urls import url
 # from magazine import views
 # from django.conf import settings
 # from django.conf.urls.static import static

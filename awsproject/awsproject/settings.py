@@ -9,9 +9,9 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
-
+import os
 from pathlib import Path
-from decouple import config 
+# from decouple import config 
 import datetime
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -61,7 +61,7 @@ ROOT_URLCONF = 'awsproject.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR,'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -86,6 +86,20 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'NAME': 'my_db',
+#         'ENGINE': 'mysql.connector.django',   # 'django.db.backends.mysql' # 'mysql.connector.django'
+#         'USER': 'root',
+#         'PASSWORD': 'root',
+#         'HOST': 'localhost',
+#         'PORT': 3306,
+#         'OPTIONS': {
+#             'autocommit': True,
+#         },
+#     }
+# }
 
 
 # Password validation
@@ -121,18 +135,33 @@ REST_FRAMEWORK = {
     }
 }
 
+# JWT_AUTH = {
+#     # Authorization:Token xxx
+#     'JWT_AUTH_HEADER_PREFIX': 'Token',
+# }
 
-JWT_AUTH = {
-    # how long the original token is valid for
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=7),
-
-    # allow refreshing of tokens
-    'JWT_ALLOW_REFRESH': True,
-
-    # this is the maximum time AFTER the token was issued that
-    # it can be refreshed.  exprired tokens can't be refreshed.
-    'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7),
+from datetime import timedelta
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": False,
+    "UPDATE_LAST_LOGIN": False,
+    "ALGORITHM": "HS256",
 }
+
+
+# JWT_AUTH = {
+#     # how long the original token is valid for
+#     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=7),
+
+#     # allow refreshing of tokens
+#     'JWT_ALLOW_REFRESH': True,
+
+#     # this is the maximum time AFTER the token was issued that
+#     # it can be refreshed.  exprired tokens can't be refreshed.
+#     'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7),
+# }
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
@@ -157,12 +186,12 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-# Celery settings
-CELERY_BROKER_URL = "redis://localhost:6379"
-CELERY_RESULT_BACKEND = "redis://localhost:6379"
+# # Celery settings
+# CELERY_BROKER_URL = "redis://localhost:6379"
+# CELERY_RESULT_BACKEND = "redis://localhost:6379"
 
-CELERY_BROKER_URL = "amqp://myuser:mypassword@localhost:5672/myvhost"
-CELERY_RESULT_BACKEND = "redis://localhost:6379"
+# CELERY_BROKER_URL = "amqp://myuser:mypassword@localhost:5672/myvhost"
+# CELERY_RESULT_BACKEND = "redis://localhost:6379"
 
 SWAGGER_SETTINGS = {
 'SECURITY_DEFINITIONS': {
@@ -174,23 +203,23 @@ SWAGGER_SETTINGS = {
 }
 }
 
-# SMTP Mail service with decouple
-EMAIL_BACKEND = config('EMAIL_BACKEND')
-EMAIL_HOST = config('EMAIL_BACKEND')
-EMAIL_HOST_USER = config('EMAIL_BACKEND')
-EMAIL_HOST_PASSWORD = config('EMAIL_BACKEND')
-EMAIL_PORT = config('EMAIL_PORT', cast=int)
-EMAIL_USE_TLS = config('EMAIL_USE_TLS')
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-
 # # SMTP Mail service with decouple
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = "smtp.gmail.com"
-# EMAIL_HOST_USER = "ashishk140@triazinesoft.com"
-# EMAIL_HOST_PASSWORD = "7633894355"
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
+# EMAIL_BACKEND = config('EMAIL_BACKEND')
+# EMAIL_HOST = config('EMAIL_BACKEND')
+# EMAIL_HOST_USER = config('EMAIL_BACKEND')
+# EMAIL_HOST_PASSWORD = config('EMAIL_BACKEND')
+# EMAIL_PORT = config('EMAIL_PORT', cast=int)
+# EMAIL_USE_TLS = config('EMAIL_USE_TLS')
 # DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+# SMTP Mail service with decouple
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_HOST_USER = "ashishk140@triazinesoft.com"
+EMAIL_HOST_PASSWORD = "7633894355"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 INTERNAL_IPS = [
     # ...

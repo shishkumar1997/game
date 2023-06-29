@@ -13,7 +13,7 @@ from django.contrib.auth.hashers import make_password,check_password
 from rest_framework import permissions
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
-from rest_framework.permissions import IsAuthenticated
+# from rest_framework.permissions import IsAuthenticated
 from .tests import generate_access_token,generate_refresh_token
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
@@ -28,20 +28,25 @@ import pandas as pd
 
 class StudentdetailAPI(generics.GenericAPIView):
     # permission_classes = [IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
 
     serializer_class = StudentSerializer
     swagger_user_id = openapi.Parameter('user_id',in_=openapi.IN_QUERY, type=openapi.TYPE_STRING)
     @swagger_auto_schema(manual_parameters=[swagger_user_id])
     def get(self,request):
-        # try:
+        try:
             user_id = self.request.query_params.get('user_id', None)
             if user_id:
+                print('--------------------11111111111111111111111')
                 Student_data = Studentdetail.objects.filter(id=user_id,is_deleted=False).last()
                 serializer = self.serializer_class(Student_data,many=False)
+                print('--------------------222222')
                 # convert into dataframe
                 df = pd.DataFrame(data=serializer.data, index=[1])
                 #convert into excel
                 df.to_excel("students121.xlsx", index=False)
+                context = {'status':True , 'message':"All student Information", 'data':serializer.data}
+                return Response(context,status=status.HTTP_200_OK)
 
             Student_data = Studentdetail.objects.filter(is_deleted=False).all()
             serializer = self.serializer_class(Student_data,many=True)
@@ -52,9 +57,9 @@ class StudentdetailAPI(generics.GenericAPIView):
             
             context = {'status':True , 'message':"All student Information", 'data':serializer.data}
             return Response(context,status=status.HTTP_200_OK)
-        # except Exception as e:
-        #     context = {'status':False , 'message':"Something went wrong"}
-        #     return Response(context,status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            context = {'status':False , 'message':"Something went wrong"}
+            return Response(context,status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def post(self,request,*args, **kwargs):
         try:
@@ -74,7 +79,7 @@ from django.core.mail import send_mail
 class AddStudentdetailAPI(generics.GenericAPIView):
     serializer_class = AddStudentSerializer
     def post(self,request,*args, **kwargs):
-        # try:
+        try:
             serializer = self.serializer_class(data=request.data)
             if serializer.is_valid():
                 mkdir=serializer.save()
@@ -90,9 +95,9 @@ class AddStudentdetailAPI(generics.GenericAPIView):
                 return Response(context,status=status.HTTP_200_OK)
             context = {'status':False , 'message':"All student Information", 'data':serializer.errors}
             return Response(context,status=status.HTTP_200_OK)
-        # except:
-        #     context = {'status':False , 'message':"Something went wrong"}
-        #     return Response(context,status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except:
+            context = {'status':False , 'message':"Something went wrong"}
+            return Response(context,status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
 class UpdateStudentdetailAPI(generics.GenericAPIView):
     serializer_class = UpdateStudentSerializer
@@ -125,8 +130,8 @@ class Update1StudentdetailAPI(generics.GenericAPIView):
     def put(self,request,*args, **kwargs):
         try:
             # student_id = context.get('') 
-            print(request.data)
-            print(request.data.get('id'),'====data')
+            # print(request.data)
+            # print(request.data.get('id'),'====data')
 
             serializer = self.serializer_class(request.data.get('id'), data=request.data, partial=True)
             if serializer.is_valid():
@@ -252,7 +257,32 @@ class StudentLoginAPIView(generics.GenericAPIView):
             return Response(context,status=status.HTTP_200_OK)
         
         except:
-
             context = {'status':False , 'message':"Something went wrong"}
             return Response(context,status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+def AddEmployee(request):
+    if request.method == 'POST':
+        serializer = AddStudentSerializer(data=request.data)
+        if serializer.is_valid():
+            gg=serializer.save()
+            serializer_data = ShowAddStudentSerializer(gg)
+            context = {'status':True , 'message':"Craete student information successfully", 'data':serializer_data.data}
+            return render(request,'account/index.html',context)
+    serializer = AddStudentSerializer()
+    context = {'status':True , 'message':"Craete student information successfully", 'data':serializer_data.data}
+    return render(request,'account/index.html',context)
+        
+
+def ListStudent(request):
+    if request.method == 'GET':
+        studata=Studentdetail.objects.all()
+        serializer = StudentSerializer(studata, many=True)
+        context = {'data':serializer.data}
+        # data=serializer.data
+        # for i in 
+        # context = {'status':True , 'message':"Craete student information successfully", 'data':serializer.data}
+        return render(request,'account/list.html',context)
+    serializer = StudentSerializer()
+    context = {'status':True , 'message':"Craete student information successfully", 'data':serializer.data}
+    return render(request,'account/list.html',context) 

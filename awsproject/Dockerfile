@@ -4,8 +4,8 @@ ENV PYTHONUNBUFFERED 1
 
 WORKDIR /home/admin2/Documents/game/game/awsproject/
 
-COPY requirements.txt ./
+COPY requirement.txt ./
 
 RUN pip uninstall django
 
-RUN pip install -r requirements.txt
+RUN pip install -r requirement.txt

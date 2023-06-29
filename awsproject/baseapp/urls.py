@@ -11,4 +11,5 @@ urlpatterns = [
     path('api/edit1_student/', views.Update1StudentdetailAPI().as_view(),name='edit1_student'),
     path('api/delete_student/', views.DeleteStudentdetailAPI().as_view(),name='delete_student'),
     path('api/student_login/', views.StudentLoginAPIView().as_view(),name='student_login'),
+    path('account/api/list_student/',views.ListStudent,name='list_student')
 ]

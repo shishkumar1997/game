@@ -1,0 +1,11 @@
+version: "3.3"
+services:
+    django_app:
+        build: .
+        container_name: new_project
+        # command: cd /myfirst/
+        command: python manage.py runserver 0.0.0.0:2000
+        volumes:
+            - .:/home/admin2/Documents/game/game/myproject
+        ports:
+            - "2000:2000"

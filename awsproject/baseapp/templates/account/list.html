@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap demo</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+ <table class="table table-sm table-dark">
+    <thead>
+      <tr>
+        <th scope="col">S.No.</th>
+        <th scope="col">name</th>
+        <th scope="col">First Name</th>
+        <th scope="col">Middle Name</th>
+        <th scope="col">Last Name</th>
+      </tr>
+    </thead>
+
+      {% for i in data %}
+
+      <tr>
+        <td>{{i.id}}</td>
+        <td>{{i.name}}</td>
+        <td>{{i.first_name}}</td>
+        <td>{{i.middle_name}}</td>
+        <td>{{i.last_name}}</td>
+      </tr>
+      {% endfor %} 
+
+  </table>
+</body>
